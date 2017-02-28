@@ -1,0 +1,25 @@
+function [NameNumFiles,ForcastValue]=forecast(Dir_data,Dir_Net)
+% 暂时冻结提取特征值
+% eigenvalueExtract(Dir_data);
+% -------------------------------------
+numMeasurementFiles=[Dir_data,'labels/LabelsToFiles.xlsx'];
+numMeasurement=xlsread(numMeasurementFiles,2);
+ForcastValueMean=[];
+for i = 1:length(numMeasurement):
+    str=numMeasurement(i,1)*10;
+    End=(numMeasurement(i,2)+1)*10-1;
+    toForecastFile=[Dir_data,'eigenvalue/Eigenvalue.csv'];
+    data_toForecast=dlmread(toForecastFile);
+    data_seg=data_toForecast(data_toForecast(:,1)>=str&data_toForecast(:,1)<=End,:);
+
+
+% x_toForecast=data_toForecast(:,2:end);
+NameNumFiles=data_toForecast(:,1);
+load([Dir_Net,'ForcastNet.mat']);
+% normInput_toForecast=x_toForecast';
+normInput_toForecast=mapminmax.apply(x_toForecast',ps_x);
+normForecastValue=sim(net,normInput_toForecast);
+% ForcastValue=normForecastValue;
+ForcastValue=mapminmax('reverse',normForecastValue,ps_y);
+ForcastValue=ForcastValue';
+end
